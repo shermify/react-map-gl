@@ -10,7 +10,8 @@ import type {
   PointLike,
   Anchor,
   Alignment,
-  MapboxMarker
+  MapboxMarker,
+  MapboxEvent
 } from '../types';
 
 import {MapContext} from './map';
@@ -66,6 +67,7 @@ export type MarkerProps = {
   popup?: MapboxPopup;
   /** CSS style override, applied to the control's container */
   style?: React.CSSProperties;
+  onClick: (e: MapboxEvent<MouseEvent>) => void;
   onDragStart?: (e: MarkerDragEvent) => void;
   onDrag?: (e: MarkerDragEvent) => void;
   onDragEnd?: (e: MarkerDragEvent) => void;
@@ -99,6 +101,15 @@ function Marker(props: MarkerProps) {
     };
 
     const mk = new mapLib.Marker(options).setLngLat([props.longitude, props.latitude]);
+
+    mk.getElement().addEventListener('click', (e: MouseEvent) => {
+      thisRef.current.props.onClick?.({
+        type: 'click',
+        target: mk,
+        originalEvent: e
+      });
+    });
+
     mk.on('dragstart', e => {
       const evt = e as MarkerDragEvent;
       evt.lngLat = marker.getLngLat();
